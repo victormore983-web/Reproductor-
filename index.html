@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIC PERSI - Music Vibe</title>
+    <style>
+        body {
+            background-color: #ffffff; 
+            color: #333;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            cursor: none; 
+            transition: background-color 0.5s ease;
+            user-select: none;
+        }
+
+        #fondo-gif {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('dark.gif') no-repeat center center;
+            background-size: cover;
+            opacity: 0; 
+            transition: opacity 0.5s ease;
+            z-index: -1;
+        }
+
+        /* EFECTO DISCO GIRATORIO */
+        #vinyl {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 5px solid #222;
+            background: radial-gradient(circle, #333 20%, #111 21%, #111 100%);
+            position: absolute;
+            top: 20%;
+            opacity: 0;
+            transition: 0.5s;
+            animation: rotate 3s linear infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #vinyl::after {
+            content: "🎵";
+            font-size: 2rem;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* VISUALIZADOR DE BARRAS */
+        .visualizer {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 50px;
+            margin-top: 20px;
+            opacity: 0;
+            transition: 0.5s;
+        }
+
+        .bar {
+            width: 4px;
+            height: 10px;
+            background: #ff0055;
+            border-radius: 2px;
+        }
+
+        .playing .bar {
+            animation: bounce 0.8s ease-in-out infinite alternate;
+        }
+
+        @keyframes bounce {
+            from { height: 10px; }
+            to { height: 50px; filter: hue-rotate(90deg); }
+        }
+
+        /* El resto de tus estilos */
+        #aura {
+            position: fixed;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(255, 0, 85, 0.2) 0%, rgba(255, 255, 255, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+            z-index: 1;
+        }
+
+        .content { text-align: center; z-index: 10; padding: 20px; }
+
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(90deg, #ff0055, #7000ff, #00d4ff);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 3s linear infinite;
+        }
+
+        @keyframes shine { to { background-position: 200% center; } }
+
+        .btn {
+            background: #ff0055;
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 5px;
+            transition: 0.3s;
+        }
+
+        .btn-secondary { background: #333; }
+        #file-input { display: none; }
+        .sparkle { position: absolute; pointer-events: none; font-size: 24px; animation: fadeUp 1s forwards; z-index: 100; }
+        @keyframes fadeUp { 0% { transform: scale(0) translateY(0); opacity: 1; } 100% { transform: scale(2) translateY(-100px); opacity: 0; } }
+    </style>
+</head>
+<body onmousedown="mostrarGif()" onmouseup="ocultarGif()" ontouchstart="mostrarGif()" ontouchend="ocultarGif()">
+
+    <div id="fondo-gif"></div>
+    <div id="aura"></div>
+    <div id="vinyl"></div>
+
+    <div class="content">
+        <h1 id="texto">VIC PERSI</h1>
+        <div id="phrase">Dale play y mantén presionado 🎵</div>
+
+        <div class="visualizer" id="viz">
+            <div class="bar" style="animation-delay: 0.1s"></div>
+            <div class="bar" style="animation-delay: 0.3s"></div>
+            <div class="bar" style="animation-delay: 0.5s"></div>
+            <div class="bar" style="animation-delay: 0.2s"></div>
+            <div class="bar" style="animation-delay: 0.4s"></div>
+            <div class="bar" style="animation-delay: 0.6s"></div>
+        </div>
+        
+        <audio id="musica" loop></audio>
+
+        <div style="margin-top: 20px;">
+            <button class="btn btn-secondary" onclick="document.getElementById('file-input').click(event)">📁 CARGAR</button>
+            <input type="file" id="file-input" accept="audio/*">
+            <button class="btn" id="play-btn" onclick="toggleMusic(event)">PLAY</button>
+        </div>
+    </div>
+
+    <script>
+        const aura = document.getElementById('aura');
+        const fondo = document.getElementById('fondo-gif');
+        const vinyl = document.getElementById('vinyl');
+        const viz = document.getElementById('viz');
+        const audio = document.getElementById('musica');
+        const playBtn = document.getElementById('play-btn');
+
+        // Cargar Música
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                audio.src = URL.createObjectURL(file);
+                playBtn.innerText = "PLAY";
+            }
+        });
+
+        // EFECTOS AL PRESIONAR
+        function mostrarGif() {
+            fondo.style.opacity = "1";
+            vinyl.style.opacity = "0.8";
+            viz.style.opacity = "1";
+            document.body.style.backgroundColor = "#000";
+        }
+
+        function ocultarGif() {
+            fondo.style.opacity = "0";
+            vinyl.style.opacity = "0";
+            viz.style.opacity = "0";
+            document.body.style.backgroundColor = "#ffffff";
+        }
+
+        function toggleMusic(e) {
+            e.stopPropagation();
+            if (!audio.src) return alert("Carga una canción");
+            
+            if (audio.paused) {
+                audio.play();
+                playBtn.innerText = "PAUSE";
+                viz.classList.add('playing');
+                vinyl.style.animationPlayState = "running";
+            } else {
+                audio.pause();
+                playBtn.innerText = "PLAY";
+                viz.classList.remove('playing');
+                vinyl.style.animationPlayState = "paused";
+            }
+        }
+
+        // Mouse Tracker
+        document.addEventListener('mousemove', (e) => {
+            aura.style.left = e.clientX + 'px';
+            aura.style.top = e.clientY + 'px';
+            if (Math.random() > 0.8) createSparkle(e.clientX, e.clientY);
+        });
+
+        function createSparkle(x, y) {
+            const s = document.createElement('div');
+            s.className = 'sparkle';
+            s.innerText = '✨';
+            s.style.left = x + 'px'; s.style.top = y + 'px';
+            document.body.appendChild(s);
+            setTimeout(() => s.remove(), 1000);
+        }
+    </script>
+</body>
+</html>
